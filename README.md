@@ -1,4 +1,12 @@
 InstaEpubDownloader
 ===================
 
-Small app for Nook Simple Touch (and other android devices) for quick downloading EPUB file from instapaper.com
+Nook Simple Touch app for downloading EPUBs from instapaper.com. Works on other Android (>=2.1) devices too.
+
+###Requirements
+- A rooted nook
+- SD card
+
+###Screenshot
+
+![InstaEpubDownloader](/screenshot.png "Screenshot")
