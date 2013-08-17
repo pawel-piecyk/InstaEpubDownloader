@@ -24,15 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
-    private DefaultHttpClient httpclient;
-    private HttpPost httpost;
-    private HttpResponse response;
-    private HttpEntity entity;
     private TextView statusMessage;
     private String fileName;
     private String login;
     private String password;
     private String path;
+
+    private String message;
 
     public static final String TAG = "DownloaderAsyncTask";
 
@@ -46,9 +44,9 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
     @Override
     protected Long doInBackground(Void... voids) {
 
-        httpclient = new DefaultHttpClient();
+        DefaultHttpClient httpclient = new DefaultHttpClient();
 
-        httpost = new HttpPost("https://www.instapaper.com/user/login");
+        HttpPost httpost = new HttpPost("https://www.instapaper.com/user/login");
 
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("username", login));
@@ -57,8 +55,8 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
         try {
             httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
-            response = httpclient.execute(httpost);
-            entity = response.getEntity();
+            HttpResponse response = httpclient.execute(httpost);
+            HttpEntity entity = response.getEntity();
 
             Log.i(TAG, "Login form get: " + response.getStatusLine());
             if (entity != null) {
@@ -70,6 +68,12 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
 
             Header[] headers = response.getHeaders("Content-Disposition");
 
+            if (headers.length <= 0) {
+                // if something went wrong
+                // TODO: better error handling would be nice e.g. "no valid password" etc.
+                message = "Cannot download EPUB file";
+                return 0L;
+            }
             fileName = headers[0].getElements()[0].getParameterByName("filename").getValue();
 
             FileOutputStream outputFile = new FileOutputStream(new File(path + fileName));
@@ -94,13 +98,15 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
 
             httpclient.getConnectionManager().shutdown();
 
+            message = (downloadedBytes / 1024) +" kB downloaded \n" +
+                      "File saved to " + path + fileName;
             return downloadedBytes;
 
-        } catch (IOException e) {
-            statusMessage.setText("Error occured: \n" + e.getMessage());
+        } catch (Exception e) {
+            message = "Error occurred: \n" + e;
+            Log.i(TAG, "Exception occurred: " + e);
+            return 0L;
         }
-
-        return 0L;
     }
 
     protected void onPreExecute() {
@@ -114,8 +120,7 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
 
     @Override
     protected void onPostExecute(Long result) {
-        statusMessage.setText((result / 1024) +" kB downloaded \n" +
-                "File saved to " + path + fileName);
+        statusMessage.setText(message);
     }
 }
 

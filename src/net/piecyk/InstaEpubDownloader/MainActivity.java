@@ -16,11 +16,20 @@ import java.io.FileFilter;
 public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
+    
+    // GUI elements
     private EditText loginField;
     private EditText passwordField;
     private EditText filesPathField;
     private CheckBox saveLoginAndPasswordCheckbox;
     private String filesPath;
+    
+    // settings fields identifiers
+    private final String LOGIN = "login";
+    private final String PASSWORD = "password";
+    
+    // preferences identifier
+    private final String PREFS = "preferences";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +57,8 @@ public class MainActivity extends Activity {
 
         if (saveLoginAndPasswordCheckbox.isChecked()) {
             saveLoginAndPassword();
+        } else {
+            deleteLoginAndPassword();
         }
 
         new DownloaderAsyncTask(loginField.getText().toString(),
@@ -84,21 +95,30 @@ public class MainActivity extends Activity {
     }
 
     public void saveLoginAndPassword() {
-        SharedPreferences settings = getSharedPreferences("preferences", MODE_PRIVATE);
+        SharedPreferences settings = getSharedPreferences(PREFS, MODE_PRIVATE);
         SharedPreferences.Editor settingsEditor = settings.edit();
-        settingsEditor.putString("login", loginField.getText().toString());
-        settingsEditor.putString("password", passwordField.getText().toString());
+        settingsEditor.putString(LOGIN, loginField.getText().toString());
+        settingsEditor.putString(PASSWORD, passwordField.getText().toString());
+        settingsEditor.commit();
+    }
+
+    public void deleteLoginAndPassword() {
+        SharedPreferences settings = getSharedPreferences(PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor settingsEditor = settings.edit();
+        settingsEditor.remove(LOGIN);
+        settingsEditor.remove(PASSWORD);
         settingsEditor.commit();
     }
 
     public void loadLoginAndPassword() {
         SharedPreferences settings =
-                getApplicationContext().getSharedPreferences("preferences", MODE_PRIVATE);
-        String login = settings.getString("login", "");
-        String password = settings.getString("password", "");
+                getApplicationContext().getSharedPreferences(PREFS, MODE_PRIVATE);
+        String login = settings.getString(LOGIN, "");
+        String password = settings.getString(PASSWORD, "");
 
         if (!login.equals("")) {
             loginField.setText(login);
+            saveLoginAndPasswordCheckbox.setChecked(true);
         }
 
         if (!password.equals("")) {
