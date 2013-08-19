@@ -58,7 +58,7 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
             HttpResponse response = httpclient.execute(httpost);
             HttpEntity entity = response.getEntity();
 
-            Log.i(TAG, "Login form get: " + response.getStatusLine());
+            Log.d(TAG, "Login form get: " + response.getStatusLine());
             if (entity != null) {
                 entity.consumeContent();
             }
@@ -80,7 +80,7 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
 
             //response.getEntity().writeTo(outputFile); //getContent() from entity
             InputStream input = response.getEntity().getContent();
-            Log.i(TAG, "File size: " + response.getEntity().getContentLength());
+            Log.d(TAG, "File size: " + response.getEntity().getContentLength());
 
             byte[] buffer = new byte[1024*32];
             int len;
@@ -90,7 +90,7 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
                 outputFile.write(buffer, 0, len);
                 downloadedBytes += len;
                 publishProgress(downloadedBytes / 1024);
-                Log.i(TAG, "Downloaded " + downloadedBytes);
+                Log.d(TAG, "Downloaded " + downloadedBytes);
             }
 
 
@@ -104,7 +104,7 @@ public class DownloaderAsyncTask extends AsyncTask<Void, Long, Long> {
 
         } catch (Exception e) {
             message = "Error occurred: \n" + e;
-            Log.i(TAG, "Exception occurred: " + e);
+            Log.w(TAG, "Exception occurred: " + e);
             return 0L;
         }
     }

@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
     private EditText passwordField;
     private EditText filesPathField;
     private CheckBox saveLoginAndPasswordCheckbox;
+    private TextView statusMessage;
     private String filesPath;
     
     // settings fields identifiers
@@ -44,6 +45,9 @@ public class MainActivity extends Activity {
         filesPathField = (EditText) findViewById(R.id.filesPath);
         filesPath = filesPathField.getText().toString();
 
+        // other fields
+        statusMessage = (TextView) findViewById(R.id.statusMessage);
+
         // save login and password checkbox
         saveLoginAndPasswordCheckbox = (CheckBox) findViewById(R.id.saveLoginAndPasswordCheckbox);
 
@@ -63,7 +67,7 @@ public class MainActivity extends Activity {
 
         new DownloaderAsyncTask(loginField.getText().toString(),
                 passwordField.getText().toString(),
-                (TextView) findViewById(R.id.status_message), filesPath).execute();
+                statusMessage, filesPath).execute();
     }
 
     public void openLastFile(View view) {
@@ -78,20 +82,26 @@ public class MainActivity extends Activity {
             }
         });
 
-        long maxModifiedTime = 0;
-        File newestFile = filesInDirectory[0];
-        for (File singleFile : filesInDirectory) {
-            if (singleFile.lastModified() > maxModifiedTime) {
-                maxModifiedTime = singleFile.lastModified();
-                newestFile = singleFile;
-            }
-        }
 
-        // starting intent to open ebook file in default epub reader
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(newestFile), "application/epub+zip");
-        startActivity(intent);
+        long maxModifiedTime = 0;
+
+        if (filesInDirectory.length == 0) {
+            statusMessage.setText("Downloads folder is empty");
+        } else {
+            File newestFile = filesInDirectory[0];
+            for (File singleFile : filesInDirectory) {
+                if (singleFile.lastModified() > maxModifiedTime) {
+                    maxModifiedTime = singleFile.lastModified();
+                    newestFile = singleFile;
+                }
+            }
+
+            // starting intent to open ebook file in default epub reader
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(newestFile), "application/epub+zip");
+            startActivity(intent);
+        }
     }
 
     public void saveLoginAndPassword() {
